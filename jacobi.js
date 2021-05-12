@@ -5,13 +5,13 @@ jacobi = class {
     // 105, 2009, pp. 305-328.
     //
     // Ported to JS by D.Reznik, May 2021.     
-    // Input: mc = complementary parameter 0 <= mc <= 1
-    static relk(mc) {
+    // Input: m = complementary parameter 0 <= m <= 1
+    static ellipticK(m) {
       let P, Q;
       const D1 = 1.0 / 16.0, D2 = 1.0 / 32.0, D3 = 21.0 / 1024.0;
       const D4 = 31.0 / 2048.0, D5 = 6257.0 / 524288.0, D6 = 10293.0 / 1048576.0;
       const PIHALF = 1.57079633, PIINV = 0.318309886;
-      let m = 1.0 - mc
+      let mc = 1.0 - m;
       if (mc < 1.05e-8) {
         return 1.38629436 - 0.5 * Math.log(mc);
       }
@@ -62,13 +62,13 @@ jacobi = class {
     }
     //
     // Single precision subroutine to compute three Jacobian elliptic functions simultaneously
-    // For limited argument: 0 <= u < K/2
     // T. Fukushima, (2012) Numer. Math. DOI 10.1007/s00211-012-0498-0
     // "Precise and Fast Computation of Jacobian Elliptic Functions by Conditional Duplication"
     // Inputs: u = argument, m, 0 < m <= 1
+    // For limited argument: 0 <= u < K/2
     // Output: s = sn(u|m), c=cn(u|m), d=dn(u|m)
     // note: origial was rscd2(u,mc), where mc=1-m
-    static rscd2(u, m) {
+    static sn_cn_dn_low(u, m) {
       let mc = 1.0 - m, uA = 1.76269 + mc * 1.16357, uT = 9.207e-4 - m * 4.604e-4;
       let u0 = u;
       let broke = false;
@@ -103,7 +103,7 @@ jacobi = class {
       }
       if (!goto2) {
         b = b / a; y = b * (2.0 - b);
-        return { c: 1.0 - b, s: Math.sqrt(y), d: Math.sqrt(1.0 - m * y) };
+        return { sn: Math.sqrt(y), cn: 1.0 - b, dn: Math.sqrt(1.0 - m * y) };
       }
       let c = a - b, mc2 = mc * 2.0, m2 = m * 2.0;
       for (let i = j; i <= n; i++) {
@@ -116,6 +116,13 @@ jacobi = class {
       }
       c = c / a;
       let x = c * c;
-      return { c: c, s: Math.sqrt(1.0 - x), d: Math.sqrt(mc + m * x) };
+      return { sn: Math.sqrt(1.0 - x), cn: c, dn: Math.sqrt(mc + m * x) };
+    }
+    static sn_cn_dn(u,m) {
+      let K = this.ellipticK(m);
+      let scd = this.sn_cn_dn_low(u,m);
+      if (Math.floor(u/K) % 4 >=2)
+        scd.sn *= -1;
+      return scd;
     }
   }

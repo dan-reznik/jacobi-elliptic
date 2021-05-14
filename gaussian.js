@@ -6,7 +6,7 @@ jacobi_curvature = class {
     this.m = this.d/this.cA;
     this.k = jacobi.ellipticK(this.m*this.m);
   }
-    // v: (1-v)*p1+v*p2 
+  // v: (1-v)*p1+v*p2 
   // u: from 0 to 4K
   // ae, be: outer ellipse semi-axes
   // m: caustic eccentricity, stachel
@@ -56,30 +56,38 @@ jacobi_curvature = class {
     const [sn4, cn4, dn4] = [scd4.sn, scd4.cn, scd4.dn];
     const [sn8, cn8, dn8] = [scd8.sn, scd8.cn, scd8.dn];
     const sn42 = sn4*sn4, sn43 = sn4*sn42;
-  const sn82 = sn8*sn8, sn84 = sn82*sn82;
-  const m2 = m*m, ae2 = ae*ae, be2 = be*be, v2 = v*v; 
-  delta = (-2*((sn82 - 1/2)*sn42 + sn8*(cn4*cn8 - 1)*sn4 - sn82/2 - 
-          cn8*cn4 + 
-          1)*((m2*sn42 + m2*sn82 - 2*dn4*dn8 - 2)*
-           v2 + (-2*m2*sn42 + 2*dn4*dn8 + 2)*v + m2*sn42 - 1)*ae2 - 
-       sn82 - 2*cn8*cn4 - sn42 + 2)*be2 + ae2*(sn8 - sn4)*(sn8-sn4); 
-  numer = (2*ae*
-        be*(dn4 + dn8)*(cn4*cn8 + sn4*sn8 - 
-          1)*((((ae2 - be2)*sn4 - sn8*ae2)*cn4 + sn4*be2*cn8)*
-           dn4 - (-sn8*be2*cn4 + (sn4*ae2 + (-ae2 + be2)*sn8)*cn8)*
-           dn8) - 2*
-        ae*(cn8*m2*sn43 - 
-          sn8*cn4*m2*sn42 + (m2*cn4/2 - (m2*sn82 + 1/2*m2)*cn8)*
-           sn4 + ((m2*sn82 - 1/2*m2)*cn4 + cn8*m2/2)*sn8)*
-        be*((ae2 - be2)*sn42 - 2*ae2*sn8*sn4 + (ae2 - be2)*sn82 - 
-          2*be2*(cn4*cn8 - 1)))*v + 
-    2*ae*be*(dn4 + dn8)*(cn4*cn8 + sn4*sn8 - 
-       1)*(-((ae2 - be2)*sn4 - sn8*ae2)*cn4 - sn4*be2*cn8)*dn4 - 
-    2*ae*(-cn8*m2*sn43 + 
-       sn8*cn4*m2*sn42 + (-m2*cn4/2 - (-1/2 - m2/2)*cn8)*sn4 - 
-       sn8*cn4/2)*
-     be*((ae2 - be2)*sn42 - 2*ae2*sn8*sn4 + (ae2 - be2)*sn82 - 
-       2*be2*(cn4*cn8 - 1));
-  return numer/Math.sqrt(delta*delta*delta)
+    const sn82 = sn8*sn8, sn84 = sn82*sn82;
+    const m2 = m*m, ae2 = ae*ae, be2 = be*be, v2 = v*v; 
+    const delta = (-2*((sn82 - 1/2)*sn42 + sn8*(cn4*cn8 - 1)*sn4 - sn82/2 - 
+                       cn8*cn4 + 
+                       1)*((m2*sn42 + m2*sn82 - 2*dn4*dn8 - 2)*
+                           v2 + (-2*m2*sn42 + 2*dn4*dn8 + 2)*v + m2*sn42 - 1)*ae2 - 
+                   sn82 - 2*cn8*cn4 - sn42 + 2)*be2 + ae2*(sn8 - sn4)*(sn8-sn4); 
+    const numer = (2*ae*
+                   be*(dn4 + dn8)*(cn4*cn8 + sn4*sn8 - 
+                                   1)*((((ae2 - be2)*sn4 - sn8*ae2)*cn4 + sn4*be2*cn8)*
+                                       dn4 - (-sn8*be2*cn4 + (sn4*ae2 + (-ae2 + be2)*sn8)*cn8)*
+                                       dn8) - 2*
+                   ae*(cn8*m2*sn43 - 
+                       sn8*cn4*m2*sn42 + (m2*cn4/2 - (m2*sn82 + 1/2*m2)*cn8)*
+                       sn4 + ((m2*sn82 - 1/2*m2)*cn4 + cn8*m2/2)*sn8)*
+                   be*((ae2 - be2)*sn42 - 2*ae2*sn8*sn4 + (ae2 - be2)*sn82 - 
+                       2*be2*(cn4*cn8 - 1)))*v + 
+          2*ae*be*(dn4 + dn8)*(cn4*cn8 + sn4*sn8 - 
+                               1)*(-((ae2 - be2)*sn4 - sn8*ae2)*cn4 - sn4*be2*cn8)*dn4 - 
+          2*ae*(-cn8*m2*sn43 + 
+                sn8*cn4*m2*sn42 + (-m2*cn4/2 - (-1/2 - m2/2)*cn8)*sn4 - 
+                sn8*cn4/2)*
+          be*((ae2 - be2)*sn42 - 2*ae2*sn8*sn4 + (ae2 - be2)*sn82 - 
+              2*be2*(cn4*cn8 - 1));
+    return numer/Math.sqrt(delta*delta*delta)
+  }
+  mean(v12,t,edge012) {
+    const u = 2*this.k*t/Math.PI;
+    return this.constructor.mean_curvature(v12, u, this.a, 1, this.m, this.k,edge012);
+  }
+  mean3(v12,t) {
+    const u = 2*this.k*t/Math.PI;
+    return [0,1,2].map(i=>this.constructor.mean_curvature(v12, u, this.a, 1, this.m, this.k,i));
   }
 }
